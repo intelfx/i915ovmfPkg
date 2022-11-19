@@ -782,22 +782,6 @@ EFI_STATUS DisplayInit(i915_CONTROLLER *iController)
     controller->write32(GMBUS0, 0);
     controller->write32(GMBUS4, 0);
 
-    // query EDID and initialize the mode
-    // it somehow fails on real hardware
-    // Verified functional on i7-10710U
-    // Status = ReadEDID(&controller->edid);
-    if (*(UINT64 *)controller->edid.magic != 0x00FFFFFFFFFFFF00uLL)
-    {
-        for (UINT32 i = 0; i < 128; i++)
-        {
-            ((UINT8 *)&controller->edid)[i] = edid_fallback[i];
-        }
-    }
-    /*  if (EFI_ERROR(Status))
-    {
-        PRINT_DEBUG(EFI_D_ERROR,"failed to read EDID\n");
-        
-    } */
     PRINT_DEBUG(EFI_D_ERROR, "got EDID:\n");
     for (UINT32 i = 0; i < 16; i++)
     {
