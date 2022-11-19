@@ -344,30 +344,17 @@ static EFI_STATUS setOutputPath(i915_CONTROLLER *controller, UINT32 found)
 
     if (controller->is_gvt)
     {
-        PRINT_DEBUG(EFI_D_ERROR, "Gvt-g Detected. Trying HDMI with all GMBUS Pins\n");
+        PRINT_DEBUG(EFI_D_ERROR, "GVT-g detected, setting HDMI and using fallback EDID\n");
 
         EDID *result;
         controller->OutputPath.ConType = HDMI;
         controller->OutputPath.DPLL = 1;
-
         controller->OutputPath.Port = PORT_B;
-        for (int i = 1; i <= 6; i++)
+        Status = ConvertFallbackEDIDToHDMIEDID(result, controller, edid_fallback);
+        if (!Status)
         {
-            Status = ReadEDIDHDMI(result, controller, i);
-            if (!Status)
-            {
-                controller->edid = *result;
-                return Status;
-            }
-            else
-            {
-                Status = ConvertFallbackEDIDToHDMIEDID(result, controller, edid_fallback);
-                if (!Status)
-                {
-                    controller->edid = *result;
-                    return Status;
-                }
-            }
+            controller->edid = *result;
+            return Status;
         }
         return EFI_NOT_FOUND;
     }
