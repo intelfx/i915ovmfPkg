@@ -667,6 +667,7 @@ EFI_STATUS EFIAPI i915ControllerDriverStart(
   g_private.FbBase = aperture_base + (UINT64)(g_private.gmadr);
   UINTN MaxFbSize = ((x_active * 4 + 64) & -64) * y_active;
   UINTN Pages = EFI_SIZE_TO_PAGES((MaxFbSize + 65535) & -65536);
+  PRINT_DEBUG(EFI_D_ERROR, "fb_size=%u (%uk %uM) fb_pages=%u\n", MaxFbSize, MaxFbSize/1024, MaxFbSize/1048576, Pages);
   EFI_PHYSICAL_ADDRESS fb_backing =
       (EFI_PHYSICAL_ADDRESS)AllocateReservedPages(Pages);
   if (!fb_backing)
