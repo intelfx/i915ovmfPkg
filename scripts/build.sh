@@ -15,4 +15,5 @@ if (( "${#ARGS[@]}" )); then
     build "${ARGS[@]}"
 else
     build -v -a X64 -t GCC5 -b DEBUG -p i915ovmfPkg/i915ovmf.dsc
+    sudo install -m600 -o libvirt-qemu -g libvirt-qemu "$WORKSPACE/Build/i915ovmf"/*/"X64/i915ovmf.rom" /var/lib/libvirt/qemu/nvram/i915ovmf.rom
 fi
