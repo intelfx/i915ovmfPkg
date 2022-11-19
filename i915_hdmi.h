@@ -67,5 +67,5 @@ struct skl_wrpll_context
 EFI_STATUS SetupClockHDMI(i915_CONTROLLER *controller);
 EFI_STATUS SetupTranscoderAndPipeHDMI(i915_CONTROLLER *controller);
 EFI_STATUS ReadEDIDHDMI(EDID *result, i915_CONTROLLER *controller, UINT8 pin);
-EFI_STATUS ConvertFallbackEDIDToHDMIEDID(EDID *result, i915_CONTROLLER *controller, UINT8 *fallback);
+EFI_STATUS ConvertFallbackEDIDToHDMIEDID(EDID *result, i915_CONTROLLER *controller, const UINT8 *fallback);
 #endif

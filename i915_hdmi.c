@@ -55,7 +55,7 @@ static BOOLEAN intel_hdmi_valid_link_rate(UINT32 pixelClock)
 
     return TRUE;
 }
-EFI_STATUS ConvertFallbackEDIDToHDMIEDID(EDID *result, i915_CONTROLLER *controller, UINT8 *fallback)
+EFI_STATUS ConvertFallbackEDIDToHDMIEDID(EDID *result, i915_CONTROLLER *controller, const UINT8 *fallback)
 {
     UINT32 i = 0;
 
