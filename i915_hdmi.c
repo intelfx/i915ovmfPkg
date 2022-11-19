@@ -57,56 +57,39 @@ static BOOLEAN intel_hdmi_valid_link_rate(UINT32 pixelClock)
 }
 EFI_STATUS ConvertFallbackEDIDToHDMIEDID(EDID *result, i915_CONTROLLER *controller, const UINT8 *fallback)
 {
-    UINT32 i = 0;
-
-    // it's an INTEL GPU, there's no way we could be big endian
-    for (i = 0; i < 128; i++)
+    for (UINT32 i = 0; i < 128; i++)
     {
         ((UINT8 *)result)[i] = fallback[i];
     }
-    UINT32 *p = (UINT32 *)result;
-    // try all the pins on GMBUS
+    if (*(UINT64 *)result->magic == 0x00FFFFFFFFFFFF00uLL)
     {
-        // gmbusWait(controller,GMBUS_HW_WAIT_PHASE);
-
-        for (UINT32 i = 0; i < 16; i++)
+        if (!intel_hdmi_valid_link_rate(result->detailTimings[DETAIL_TIME_SELCTION].pixelClock))
         {
-            for (UINT32 j = 0; j < 8; j++)
+            for (int j = 0; j < 4; j++)
             {
-                DebugPrint(EFI_D_ERROR, "%02x ", ((UINT8 *)(p))[i * 8 + j]);
-            }
-            DebugPrint(EFI_D_ERROR, "\n");
-        }
-        if (i >= 128 && *(UINT64 *)result->magic == 0x00FFFFFFFFFFFF00uLL)
-        {
-            if (!intel_hdmi_valid_link_rate(result->detailTimings[DETAIL_TIME_SELCTION].pixelClock))
-            {
-                for (int j = 0; j < 4; j++)
+                if (result->detailTimings[j].pixelClock > 0 && intel_hdmi_valid_link_rate(result->detailTimings[j].pixelClock))
                 {
-                    if (result->detailTimings[j].pixelClock > 0 && intel_hdmi_valid_link_rate(result->detailTimings[j].pixelClock))
-                    {
-                        result->detailTimings[DETAIL_TIME_SELCTION] = result->detailTimings[j];
-                        return EFI_SUCCESS;
-                    }
+                    result->detailTimings[DETAIL_TIME_SELCTION] = result->detailTimings[j];
+                    return EFI_SUCCESS;
                 }
-                PRINT_DEBUG(EFI_D_ERROR, "pixelClock: %d\n", result->detailTimings[DETAIL_TIME_SELCTION].pixelClock);
+            }
+            PRINT_DEBUG(EFI_D_ERROR, "pixelClock: %d\n", result->detailTimings[DETAIL_TIME_SELCTION].pixelClock);
 
-                for (int j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
+            {
+                if (result->detailTimings[j].pixelClock >> 1 > 0 && intel_hdmi_valid_link_rate(result->detailTimings[j].pixelClock >> 1))
                 {
-                    if (result->detailTimings[j].pixelClock >> 1 > 0 && intel_hdmi_valid_link_rate(result->detailTimings[j].pixelClock >> 1))
-                    {
-                        result->detailTimings[j].pixelClock = result->detailTimings[j].pixelClock >> 1;
-                        result->detailTimings[DETAIL_TIME_SELCTION] = result->detailTimings[j];
-                        return EFI_SUCCESS;
-                    }
+                    result->detailTimings[j].pixelClock = result->detailTimings[j].pixelClock >> 1;
+                    result->detailTimings[DETAIL_TIME_SELCTION] = result->detailTimings[j];
+                    return EFI_SUCCESS;
                 }
-                PRINT_DEBUG(EFI_D_ERROR, "pixelClock: %d\n", result->detailTimings[DETAIL_TIME_SELCTION].pixelClock);
             }
-            // if (result->detailTimings[DETAIL_TIME_SELCTION].pixelClock > 3) {
-            //     result->detailTimings[DETAIL_TIME_SELCTION].pixelClock >> 1;
-            // }
-            return EFI_SUCCESS;
+            PRINT_DEBUG(EFI_D_ERROR, "pixelClock: %d\n", result->detailTimings[DETAIL_TIME_SELCTION].pixelClock);
         }
+        // if (result->detailTimings[DETAIL_TIME_SELCTION].pixelClock > 3) {
+        //     result->detailTimings[DETAIL_TIME_SELCTION].pixelClock >> 1;
+        // }
+        return EFI_SUCCESS;
     }
     return EFI_NOT_FOUND;
 }
